@@ -1,11 +1,12 @@
 ﻿import "dotenv/config";
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { sql } from "./db";
+import { db } from "./db";
 
 // ── Routes ──────────────────────────────────────────────────────────────────
 import authRouter from "./routes/auth";
 import campaignsRouter from "./routes/campaigns";
+import contributionsRouter from "./routes/contributions";
 
 
 const app = express();
@@ -27,11 +28,11 @@ app.get("/", (_req: Request, res: Response) => {
 // ── DB Test (can remove before production) ───────────────────────────────────
 app.get("/api/test-db", async (_req: Request, res: Response) => {
   try {
-    const rawResult = await sql`SELECT NOW() as server_time;`;
+    const rawResult = await db.execute("SELECT NOW() as server_time");
     res.json({
       ok: true,
       message: "✅ PostgreSQL connection verified!",
-      serverTime: rawResult[0].server_time,
+      serverTime: rawResult.rows[0].server_time,
     });
   } catch (error: any) {
     res.status(500).json({ ok: false, error: error.message });
@@ -41,6 +42,7 @@ app.get("/api/test-db", async (_req: Request, res: Response) => {
 // ── API Routes ────────────────────────────────────────────────────────────────
 app.use("/api/auth", authRouter);
 app.use("/api/campaigns", campaignsRouter);
+app.use("/api/contributions", contributionsRouter);
 // ── Start Server ──────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n=========================================`);
@@ -50,5 +52,6 @@ app.listen(PORT, () => {
   console.log(`🔐 Auth    →  POST /api/auth/login`);
   console.log(`=========================================\n`);
 });
+
 
 

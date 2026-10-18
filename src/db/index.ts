@@ -1,19 +1,23 @@
-﻿import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import * as dotenv from "dotenv";
+﻿import * as dotenv from "dotenv";
+import { neonConfig, Pool } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import ws from "ws";
 import * as schema from "./schema";
 
 dotenv.config();
 
-const connectionString = process.env.DATABASE_URL;
+// Node.js does not have a native WebSocket — provide the ws package
+// This enables the neon-serverless driver to hold a persistent connection,
+// which is required for db.transaction() to work
+neonConfig.webSocketConstructor = ws;
 
+const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
-  throw new Error("❌ DATABASE_URL is not defined in environment variables!");
+  throw new Error("DATABASE_URL is not defined in environment variables!");
 }
 
-// 1. Neon HTTP SQL query client
-const sql = neon(connectionString);
+// Pool = persistent TCP connection to Neon (supports transactions)
+const pool = new Pool({ connectionString });
 
-// 2. Drizzle ORM instance with Schema registered
-export const db = drizzle(sql, { schema });
-export { sql };
+export const db = drizzle(pool, { schema });
+export { pool };

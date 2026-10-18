@@ -8,7 +8,7 @@ import authRouter from "./routes/auth";
 import campaignsRouter from "./routes/campaigns";
 import contributionsRouter from "./routes/contributions";
 import withdrawalsRouter from "./routes/withdrawals";
-
+import notificationsRouter from "./routes/notifications";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -44,6 +44,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/campaigns", campaignsRouter);
 app.use("/api/contributions", contributionsRouter);
 app.use("/api/withdrawals", withdrawalsRouter);
+app.use("/api/notifications", notificationsRouter);
 // ── Start Server ──────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n=========================================`);

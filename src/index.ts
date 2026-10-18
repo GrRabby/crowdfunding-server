@@ -5,6 +5,8 @@ import { sql } from "./db";
 
 // ── Routes ──────────────────────────────────────────────────────────────────
 import authRouter from "./routes/auth";
+import campaignsRouter from "./routes/campaigns";
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,7 +40,7 @@ app.get("/api/test-db", async (_req: Request, res: Response) => {
 
 // ── API Routes ────────────────────────────────────────────────────────────────
 app.use("/api/auth", authRouter);
-
+app.use("/api/campaigns", campaignsRouter);
 // ── Start Server ──────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n=========================================`);
@@ -48,3 +50,5 @@ app.listen(PORT, () => {
   console.log(`🔐 Auth    →  POST /api/auth/login`);
   console.log(`=========================================\n`);
 });
+
+

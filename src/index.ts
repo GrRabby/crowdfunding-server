@@ -3,50 +3,48 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { sql } from "./db";
 
+// ── Routes ──────────────────────────────────────────────────────────────────
+import authRouter from "./routes/auth";
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ── Middlewares ──────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
 
-// Root Health Check Route
+// ── Health Check ─────────────────────────────────────────────────────────────
 app.get("/", (_req: Request, res: Response) => {
   res.json({
     ok: true,
-    message: "🚀 Crowdfunding API Server is active and running",
+    message: "🚀 Crowdfunding API Server is running",
     timestamp: new Date().toISOString(),
   });
 });
 
-// Database Connectivity Test Route
+// ── DB Test (can remove before production) ───────────────────────────────────
 app.get("/api/test-db", async (_req: Request, res: Response) => {
   try {
-    // Run a lightweight raw query directly against Neon PostgreSQL
-    const result = await sql`
-      SELECT
-        NOW() AS server_time,
-        version() AS pg_version
-    `;
+    const rawResult = await sql`SELECT NOW() as server_time;`;
     res.json({
       ok: true,
-      message: "✅ PostgreSQL connection successful!",
-      databaseResponse: result[0],
+      message: "✅ PostgreSQL connection verified!",
+      serverTime: rawResult[0].server_time,
     });
   } catch (error: any) {
-    console.error("❌ Database connection error:", error);
-    res.status(500).json({
-      ok: false,
-      error: "Failed to connect to PostgreSQL",
-      details: error.message,
-    });
+    res.status(500).json({ ok: false, error: error.message });
   }
 });
 
-// Start Express Listener
+// ── API Routes ────────────────────────────────────────────────────────────────
+app.use("/api/auth", authRouter);
+
+// ── Start Server ──────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log("\n=========================================");
-  console.log(`🚀 Server listening on http://localhost:${PORT}`);
-  console.log(`📡 Health Check:   http://localhost:${PORT}/`);
-  console.log(`🐘 DB Test Route:  http://localhost:${PORT}/api/test-db`);
-  console.log("=========================================\n");
+  console.log(`\n=========================================`);
+  console.log(`🚀 Server  →  http://localhost:${PORT}`);
+  console.log(`📡 Health  →  GET /`);
+  console.log(`🔐 Auth    →  POST /api/auth/register`);
+  console.log(`🔐 Auth    →  POST /api/auth/login`);
+  console.log(`=========================================\n`);
 });
